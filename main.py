@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi import Body
+from fastapi.params import Body
 app=FastAPI()
 
 @app.get("/")
@@ -13,4 +13,4 @@ async def get_posts():
 @app.post("/create_posts")
 async def create_post(payload: dict=Body(...)):
     print(payload)
-    return {"message": "Post created successfully."}
+    return {"new_post": f"title: {payload['title']}  content: {payload['content']}" }
