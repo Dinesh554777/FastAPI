@@ -18,14 +18,17 @@ class Post(BaseModel):
 async def root():
     return {"message": "Welcome to my FastAPI application!"}
 
-my_posts=[{"title": "My posts", "content":"My posts content", "id": 3}]
+my_posts=[{"title": "My posts", "content":"My posts content", "id": 3},{"title": "My foods", "content":"My favourite foods", "id": 1},{"title": "My cars", "content":"My favourite cars", "id": 5}]
 
 def find_posts(id):
     for p in my_posts:
         if p["id"] == id:
             return p
 
-
+def find_index_of_posts(id):
+    for i, p in enumerate(my_posts):
+        if p["id"] == id:
+            return i
 @app.get("/posts")
 async def get_posts():
     return {"message": my_posts}
@@ -48,7 +51,16 @@ def get_one_post(id : int,):
         # return f"post with id:{id} not found error"
     return {"data" : post}
 
+@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_posts(id: int):
+    #deleting post
+    #find the index in the array that has requierd ID
+    #my_posts.pop(Index)
+    index=find_index_of_posts(id)
 
-
+    if index==None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id: {id} does not exist")
+    my_posts.pop(index)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
