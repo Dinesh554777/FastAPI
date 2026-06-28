@@ -62,12 +62,14 @@ async def create_post(post: Post):
 
 @app.get("/posts/{id}")
 def get_one_post(id : int,):
-    post = find_posts(id)
-    if not post:
+    cursor.execute("SELECT * FROM posts WHERE id = %s",(str(id)))
+    posts=cursor.fetchone()
+
+    if not posts:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id:{id} not found error")
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return f"post with id:{id} not found error"
-    return {"data" : post}
+    return {"data" : posts}
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id: int):
