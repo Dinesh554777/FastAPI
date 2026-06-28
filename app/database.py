@@ -1,8 +1,10 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL='postgres://postgres:Dinesh@30112006@localhost/fastapi'
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine=create_engine(SQLALCHEMY_DATABASE_URL)
 
