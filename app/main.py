@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, status, HTTPException
+from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
 from pydantic import BaseModel
 from typing import Optional
@@ -6,9 +6,14 @@ from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from sqlalchemy.orm import Session
+from . import models
+from .database import engine, get_db
+
+
+models.Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
-
 
 class Post(BaseModel):
     title:str
@@ -31,6 +36,11 @@ while True:
 @app.get("/")
 async def root():
     return {"message": "Welcome to my FastAPI application!"}
+
+@app.get("/sqlalchemy")
+def test_posts(db: Session = Depends(get_db)):
+    return {"message":"success"}
+
 
 my_posts=[{"title": "My posts", "content":"My posts content", "id": 3},{"title": "My foods", "content":"My favourite foods", "id": 1},{"title": "My cars", "content":"My favourite cars", "id": 5}]
 
