@@ -43,9 +43,12 @@ def find_index_of_posts(id):
     for i, p in enumerate(my_posts):
         if p["id"] == id:
             return i
+
 @app.get("/posts")
 async def get_posts():
-    return {"message": my_posts}
+    cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 async def create_post(post: Post):
