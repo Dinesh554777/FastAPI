@@ -52,12 +52,13 @@ async def get_posts():
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 async def create_post(post: Post):
-
-    post_dict=post.dict()
-    post_dict['id'] = randrange(1,10000000)
-    my_posts.append(post_dict)
+    cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s,%s,%s) RETURNING *""",(post.title, post.content, post.published))
     
-    return {"data":post_dict}
+    new_post=cursor.fetchone()
+    conn.commit()
+
+    
+    return {"data":new_post}
 
 @app.get("/posts/{id}")
 def get_one_post(id : int,):
