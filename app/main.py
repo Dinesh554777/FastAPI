@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from random import randrange
 import psycopg2
@@ -45,15 +45,15 @@ def find_index_of_posts(id):
         if p["id"] == id:
             return i
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.Post])
 async def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
     posts= db.query(models.Post).all()
 
-    return {"data": posts}
+    return posts
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s,%s,%s) RETURNING *""",(post.title, post.content, post.published))
     
@@ -67,9 +67,9 @@ async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     db.refresh(new_post)
 
     
-    return {"data":new_post}
+    return new_post
 
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=schemas.Post)
 def get_one_post(id : int, db: Session = Depends(get_db)):
     # cursor.execute("SELECT * FROM posts WHERE id = %s",(str(id)))
     # posts=cursor.fetchone()
@@ -80,7 +80,7 @@ def get_one_post(id : int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"post with id:{id} not found error")
         # response.status_code = status.HTTP_404_NOT_FOUND
         # return f"post with id:{id} not found error"
-    return {"data" : post}
+    return post
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id: int, db: Session = Depends(get_db)):
@@ -96,7 +96,7 @@ def delete_posts(id: int, db: Session = Depends(get_db)):
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@app.put("/posts/{id}")
+@app.put("/posts/{id}", response_model=schemas.Post)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE posts SET title = %s, content =%s,published=%s WHERE id =%s RETURNING *""",(post.title,post.content,post.published, str(id)))
 
@@ -112,4 +112,4 @@ def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends
     
     post_query.update(updated_post.dict(),synchronize_session=False)
     db.commit()
-    return {"message" :post_query.first()}
+    return post_query.first()
