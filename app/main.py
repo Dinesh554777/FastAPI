@@ -1,24 +1,19 @@
 from fastapi import FastAPI, Response, status, HTTPException, Depends
 from fastapi.params import Body
-from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
 from sqlalchemy.orm import Session
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 
 
 models.Base.metadata.create_all(bind=engine)
 
 app=FastAPI()
-
-class Post(BaseModel):
-    title:str
-    content:str
-    published: bool = True
 
 while True:
     try:
@@ -36,12 +31,6 @@ while True:
 @app.get("/")
 async def root():
     return {"message": "Welcome to my FastAPI application!"}
-
-@app.get("/sqlalchemy")
-def test_posts(db: Session = Depends(get_db)):
-    posts= db.query(models.Post).all()
-
-    return {"data":posts}
 
 
 my_posts=[{"title": "My posts", "content":"My posts content", "id": 3},{"title": "My foods", "content":"My favourite foods", "id": 1},{"title": "My cars", "content":"My favourite cars", "id": 5}]
@@ -65,7 +54,7 @@ async def get_posts(db: Session = Depends(get_db)):
     return {"data": posts}
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-async def create_post(post: Post, db: Session = Depends(get_db)):
+async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s,%s,%s) RETURNING *""",(post.title, post.content, post.published))
     
     # new_post=cursor.fetchone()
@@ -108,7 +97,7 @@ def delete_posts(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put("/posts/{id}")
-def update_post(id: int, updated_post: Post, db: Session = Depends(get_db)):
+def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE posts SET title = %s, content =%s,published=%s WHERE id =%s RETURNING *""",(post.title,post.content,post.published, str(id)))
 
     # updated_post=cursor.fetchone()
