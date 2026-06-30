@@ -5,9 +5,11 @@ from ..database import get_db
 from typing import  List
 
 
-router=APIRouter()
+router=APIRouter(
+    prefix="/posts"
+)
 
-@router.get("/posts", response_model=List[schemas.Post])
+@router.get("/", response_model=List[schemas.Post])
 async def get_posts(db: Session = Depends(get_db)):
     # cursor.execute("""SELECT * FROM posts""")
     # posts = cursor.fetchall()
@@ -15,7 +17,7 @@ async def get_posts(db: Session = Depends(get_db)):
 
     return posts
 
-@router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Post)
 async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""INSERT INTO posts (title, content, published) VALUES(%s,%s,%s) RETURNING *""",(post.title, post.content, post.published))
     
@@ -31,7 +33,7 @@ async def create_post(post: schemas.PostCreate, db: Session = Depends(get_db)):
     
     return new_post
 
-@router.get("/posts/{id}", response_model=schemas.Post)
+@router.get("/{id}", response_model=schemas.Post)
 def get_one_post(id : int, db: Session = Depends(get_db)):
     # cursor.execute("SELECT * FROM posts WHERE id = %s",(str(id)))
     # posts=cursor.fetchone()
@@ -44,7 +46,7 @@ def get_one_post(id : int, db: Session = Depends(get_db)):
         # return f"post with id:{id} not found error"
     return post
 
-@router.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_posts(id: int, db: Session = Depends(get_db)):
 
     # cursor.execute("""DELETE FROM posts WHERE id =%s returning *""",(str(id),))
@@ -58,7 +60,7 @@ def delete_posts(id: int, db: Session = Depends(get_db)):
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@router.put("/posts/{id}", response_model=schemas.Post)
+@router.put("/{id}", response_model=schemas.Post)
 def update_post(id: int, updated_post: schemas.PostCreate, db: Session = Depends(get_db)):
     # cursor.execute("""UPDATE posts SET title = %s, content =%s,published=%s WHERE id =%s RETURNING *""",(post.title,post.content,post.published, str(id)))
 
